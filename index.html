@@ -5,10 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>O Alquimista do Avesso — Alex</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
+<link href="https://fonts.googleapis.com/css2 family=Cinzel:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -30,45 +27,58 @@ body {
   justify-content: center;
   font-family: 'EB Garamond', Georgia, serif;
   overflow: hidden;
+  perspective: 1500px; /* Cria o ambiente 3D real */
 }
 
-/* Container do Livro */
-#book-wrapper {
+/* Palco do Livro */
+.book-container {
   position: relative;
-  width: 900px;
+  width: 450px; /* Largura de uma página */
   height: 600px;
-  box-shadow: 0 30px 70px rgba(0,0,0,0.8);
-  visibility: hidden; /* Oculta até o turn.js carregar e alinhar tudo */
+  transition: transform 0.5s;
+  transform-style: preserve-3d;
 }
 
-#biography-book {
-  width: 900px;
-  height: 600px;
+/* Quando o livro abre, ele se move ligeiramente para o centro */
+.book-container.open {
+  transform: translateX(50%);
 }
 
-/* Estilo Base das Páginas */
-.page {
-  width: 450px;
-  height: 600px;
-  background: var(--paper) !important;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E") !important;
-  padding: 50px 40px;
-  position: relative;
-  box-shadow: inset 3px 0 20px rgba(0,0,0,0.08);
-}
-
-.inner-border {
+/* Estrutura de cada Folha (Frente e Verso) */
+.sheet {
   position: absolute;
-  inset: 20px;
-  border: 1px solid rgba(150,110,50,0.15);
-  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  top: 0; left: 0;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  cursor: pointer;
+  z-index: 1;
+}
+
+/* Lados da Folha */
+.page-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  background: var(--paper);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  padding: 50px 40px;
+  box-shadow: inset 3px 0 20px rgba(0,0,0,0.05);
+}
+
+/* Verso precisa ser rotacionado */
+.page-face.back {
+  transform: rotateY(180deg);
+  box-shadow: inset -3px 0 20px rgba(0,0,0,0.05);
 }
 
 /* Capas Rígidas */
 .hardcover {
   background: linear-gradient(145deg, #240c0e 0%, #120608 100%) !important;
   color: var(--gold-lt) !important;
-  padding: 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -77,113 +87,67 @@ body {
   border: 1px solid rgba(201,168,76,0.2);
 }
 
-.cover-title {
-  font-family: 'Cinzel', serif;
-  font-size: 2.5rem;
-  letter-spacing: 0.1em;
-  line-height: 1.2;
-  margin-bottom: 15px;
+/* Elementos Visuais Internos */
+.inner-border {
+  position: absolute;
+  inset: 20px;
+  border: 1px solid rgba(150,110,50,0.15);
+  pointer-events: none;
 }
 
-.cover-subtitle {
-  font-style: italic;
-  font-size: 1.1rem;
-  color: rgba(226,200,122,0.7);
-  letter-spacing: 0.12em;
-  margin-bottom: 60px;
-}
+.cover-title { font-family: 'Cinzel', serif; font-size: 2.3rem; letter-spacing: 0.1em; line-height: 1.2; margin-bottom: 15px; }
+.cover-subtitle { font-style: italic; font-size: 1rem; color: rgba(226,200,122,0.7); letter-spacing: 0.12em; margin-bottom: 60px; }
+.cover-author { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--gold); }
+.chapter-title { font-family: 'Cinzel', serif; font-size: 1.25rem; text-align: center; color: var(--wine); margin-bottom: 20px; }
+.poem-quote { font-style: italic; font-size: 0.95rem; text-align: center; color: #7a5c38; margin-bottom: 25px; line-height: 1.5; }
+.prose { line-height: 1.7; text-align: justify; font-size: 1.05rem; color: var(--ink); }
+.prose::first-letter { font-family: 'Playfair Display', serif; font-size: 2.8rem; float: left; line-height: 0.8; margin-right: 8px; color: var(--wine); font-weight: bold; }
+.chapter-end { position: absolute; bottom: 45px; left: 40px; right: 40px; text-align: center; font-style: italic; color: #8a6a2a; border-top: 1px solid rgba(150,110,50,0.1); padding-top: 12px; font-size: 0.95rem; }
+.page-num { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 0.8rem; color: rgba(0,0,0,0.4); }
 
-.cover-author {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.6rem;
+/* Controladores inferiores */
+.controls {
+  margin-top: 30px;
+  display: flex;
+  gap: 20px;
+}
+.btn {
+  background: none;
+  border: 1px solid var(--gold);
   color: var(--gold);
-}
-
-/* Textos e Capítulos */
-.chapter-title {
+  padding: 10px 25px;
+  cursor: pointer;
   font-family: 'Cinzel', serif;
-  font-size: 1.3rem;
-  text-align: center;
-  color: var(--wine);
-  margin-bottom: 20px;
+  transition: 0.3s;
 }
+.btn:hover { background: var(--gold); color: black; }
 
-.poem-quote {
-  font-style: italic;
-  font-size: 1rem;
-  text-align: center;
-  color: #7a5c38;
-  margin-bottom: 25px;
-  line-height: 1.5;
-}
-
-.prose {
-  line-height: 1.7;
-  text-align: justify;
-  font-size: 1.1rem;
-  color: var(--ink);
-}
-
-.prose::first-letter {
-  font-family: 'Playfair Display', serif;
-  font-size: 3rem;
-  float: left;
-  line-height: 0.8;
-  margin-right: 8px;
-  color: var(--wine);
-  font-weight: bold;
-}
-
-.chapter-end {
-  position: absolute;
-  bottom: 50px;
-  left: 40px;
-  right: 40px;
-  text-align: center;
-  font-style: italic;
-  color: #8a6a2a;
-  border-top: 1px solid rgba(150,110,50,0.1);
-  padding-top: 15px;
-  font-size: 1rem;
-}
-
-.page-num {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.8rem;
-  color: rgba(0,0,0,0.4);
-}
-
-.hint {
-  color: rgba(255,255,255,0.4);
-  margin-top: 25px;
-  font-size: 0.9rem;
-  letter-spacing: 2px;
-  font-family: 'Cinzel', serif;
+/* Classes de Virada Tratadas pelo JS */
+.flipped {
+  transform: rotateY(-180deg);
 }
 </style>
 </head>
 <body>
 
-<div id="book-wrapper">
-  <div id="biography-book">
-    
-    <div class="page hardcover">
+<div class="book-container" id="biography-book">
+  
+  <div class="sheet" id="s1" style="z-index: 6;">
+    <div class="page-face front hardcover">
       <div class="cover-title">O Alquimista<br>do Avesso</div>
       <div class="cover-subtitle">Memórias de um Coração Desperto</div>
       <div class="cover-author">Alex</div>
     </div>
-
-    <div class="page" style="box-shadow: inset -10px 0 20px rgba(0,0,0,0.15);">
+    <div class="page-face back" style="box-shadow: inset -15px 0 30px rgba(0,0,0,0.15);">
       <div class="inner-border"></div>
     </div>
+  </div>
 
-    <div class="page">
+  <div class="sheet" id="s2" style="z-index: 5;">
+    <div class="page-face front">
       <div class="inner-border"></div>
-      <div style="height:100%; display:flex; flex-direction:column; justify-content:center; text-align:center; padding:20px;">
-        <p style="font-style:italic; font-size:1.25rem; line-height:2; color:var(--wine);">
+      <div style="height:100%; display:flex; flex-direction:column; justify-content:center; text-align:center; padding:10px;">
+        <p style="font-style:italic; font-size:1.15rem; line-height:2; color:var(--wine);">
           "Para a garota que me ensinou que até o gelo pode derreter.<br><br>
           Mesmo que nossas histórias tenham seguido caminhos diferentes,<br><br>
           você mudou para sempre a forma como eu enxergo o mundo."
@@ -191,8 +155,7 @@ body {
       </div>
       <div class="page-num">1</div>
     </div>
-
-    <div class="page">
+    <div class="page-face back">
       <div class="inner-border"></div>
       <h2 class="chapter-title">Prefácio</h2>
       <div class="prose">
@@ -200,8 +163,10 @@ body {
       </div>
       <div class="page-num">2</div>
     </div>
+  </div>
 
-    <div class="page">
+  <div class="sheet" id="s3" style="z-index: 4;">
+    <div class="page-face front">
       <div class="inner-border"></div>
       <h2 class="chapter-title">Prólogo — O Garoto de Gelo</h2>
       <p class="poem-quote">"Eu era a pedra que não sabia sangrar,<br>o automático perfeito, o inverno que não quer passar."</p>
@@ -211,8 +176,7 @@ body {
       <div class="chapter-end">"O amor não me ensinou a viver. Ele me ensinou que eu estava apenas existindo."</div>
       <div class="page-num">3</div>
     </div>
-
-    <div class="page">
+    <div class="page-face back">
       <div class="inner-border"></div>
       <h2 class="chapter-title">Capítulo 1 — A Partida</h2>
       <p class="poem-quote">"Partir é uma forma silenciosa de morrer para o que fomos."</p>
@@ -222,78 +186,127 @@ body {
       <div class="chapter-end">"Há despedidas que machucam menos do que os silêncios."</div>
       <div class="page-num">4</div>
     </div>
+  </div>
 
-    <div class="page">
+  <div class="sheet" id="s4" style="z-index: 3;">
+    <div class="page-face front">
       <div class="inner-border"></div>
       <h2 class="chapter-title">Capítulo 2 — O Maldito Pátio</h2>
       <p class="poem-quote">"No silêncio de um canto opaco,<br>a mente constrói o seu próprio labirinto."</p>
       <div class="prose">
         O tempo avançou e comecei a frequentar a escola no Amazonas a partir do 6º ano. Se a minha habilidade para criar conexões já era escassa desde a infância, ali as coisas atingiram o limite absoluto. Atravessei praticamente todo o ensino fundamental sem trocar uma palavra sincera com ninguém, sem um único amigo. O recreio era a materialização do meu inferno pessoal. Eles trancavam as portas das salas e obrigavam toda a gente a descer para o pátio. Eu passava aqueles minutos intermináveis parado, estático num canto isolado, simplesmente vendo o tempo escoar. Foi a coisa mais horrível da minha vida. Mas foi ali que as vozes na minha cabeça ganharam força; falar comigo mesmo passou a ser o único escudo para acelerar as horas.
       </div>
-      <div class="chapter-end">"Algumas pessoas entram na nossa vida para ficar. Outras entram para nos transformar."</div>
+      <div class="chapter-end">"Algumas pessoas entram na nossa vida para nos transformar."</div>
       <div class="page-num">5</div>
     </div>
-
-    <div class="page">
+    <div class="page-face back">
       <div class="inner-border"></div>
       <h2 class="chapter-title">Capítulo 5 — O Primeiro Olhar</h2>
       <p class="poem-quote">"Você era o caos que a minha lógica nunca quis calcular."</p>
       <div class="prose">
         Então, o segundo ano do ensino médio começou, e com ele veio o embate definitivo com o desconhecido. Conheci o amor — esse sentimento simultaneamente magnífico, terrível e profundamente misterioso. A nossa primeira interação real aconteceu na quadra da escola, quando te passei uma cola de administração. Olhando para trás, creio que foi ali que experimentei o impacto avassalador do amor à primeira vista. Pela primeira vez na vida, deparei-me com uma mente que eu não conseguia decifrar ou rotular nos primeiros segundos de conversa. Eu não sabia o que estava a acontecer comigo; nunca tinha sentido aquela urgência, aquele ciúme corrosivo de te ver conversar com outros, aquela obsessão silenciosa que ocupava os meus pensamentos a cada hora do dia. O garoto de gelo começava, finalmente, a rachar.
       </div>
-      <div class="chapter-end">"Ela nunca soube que era a personagem principal do livro que eu escrevia dentro da minha cabeça."</div>
+      <div class="chapter-end">"Ela nunca soube que era a personagem principal do livro que eu escrevia."</div>
       <div class="page-num">6</div>
     </div>
+  </div>
 
-    <div class="page">
+  <div class="sheet" id="s5" style="z-index: 2;">
+    <div class="page-face front">
       <div class="inner-border"></div>
       <h2 class="chapter-title">Capítulo 9 — O Dia em que o Tempo Parou</h2>
       <p class="poem-quote">"A única rima que realmente importava no meu teorema."</p>
       <div class="prose">
-        Havia um milagre discreto que acontecia sempre que estávamos juntos: o turbilhão barulhento dos meus pensamentos calava-se por completo no instante exato em que tu pousavas a cabeça no meu ombro. A minha mente, sempre tão analítica e caótica, resumia-se a um único e suplicante desejo: que o universo congelasse aquele momento para sempre. Quando o final do ano se aproximou, juntei todas as minhas forças e decidi que me declararia na noite da formatura. Faltou-me a coragem presencial. Acabei por confessar tudo através de uma mensagem de telemóvel — um gesto que hoje reconheço como patético. Tu deste uma resposta ambígua, daquelas que só tu sabias dar, mantendo o misterério que eu nunca conseguia prever.
+        Havia um milagre discreto que acontecia sempre que estávamos juntos: o turbilhão barulhento dos meus pensamentos calava-se por completo no instante exato em que tu pousavas a cabeça no meu ombro. A minha mente, sempre tão analítica e caótica, resumia-se a um único e suplicante desejo: que o universo congelasse aquele momento para sempre. Quando o final do ano se aproximou, juntei todas as minhas forças e decidi que me declararia na noite da formatura. Faltou-me a coragem presencial. Acabei por confessar tudo através de uma mensagem de telemóvel — um gesto que hoje reconheço como patético. Tu deste uma resposta ambígua, daquelas que só tu sabias dar, mantendo o mistério que eu nunca conseguia prever.
       </div>
       <div class="chapter-end">"Pela primeira vez a armadura pesou, e o garoto de gelo chorou."</div>
       <div class="page-num">7</div>
     </div>
-
-    <div class="page">
+    <div class="page-face back">
       <div class="inner-border"></div>
       <h2 class="chapter-title">Epílogo — Onde o Mundo Ganhou Cor</h2>
-      <p class="poem-quote">"A solidão é um vício confortável, mas o mundo real exige coragem."</p>
-      <div class="prose" style="font-size:1.05rem;">
+      <div class="prose" style="font-size:0.95rem; line-height:1.6;">
         Deixo-te este último conselho de quem te quer bem: foca-te numa única meta até seres verdadeiramente excecional nela. O dinheiro dar-te-á a estrutura para realizares os teus inúmeros sonhos; não te disperses a tentar fazer tudo ao mesmo tempo para não seres apenas "mais ou menos" em tudo. E não te escondas tanto no teu próprio mundo. Enfrenta os teus demónios de frente. Peço-te apenas que respeites o meu espaço e não me envies mensagens durante os próximos dois meses; preciso deste tempo para recuperar o controlo dos meus sentimentos e não vacilar. Se o destino decidir que nos cruzaremos novamente no futuro, sabe que serei sempre alguém capaz de te compreender como ninguém. Cuida-te, minha linda flor.
       </div>
-      <div class="chapter-end" style="border:none; font-weight:bold; color:var(--wine); bottom:35px; font-size:1.05rem; text-align:justify; line-height:1.4;">
+      <div class="chapter-end" style="border:none; font-weight:bold; color:var(--wine); bottom:30px; font-size:0.95rem; text-align:justify; line-height:1.4;">
         "Talvez você nunca leia estas páginas. Mas, se algum dia ler, saiba que foi você quem colocou cor em um mundo que eu acreditava ser feito apenas de cinza."
       </div>
       <div class="page-num">8</div>
     </div>
+  </div>
 
-    <div class="page" style="box-shadow: inset 10px 0 20px rgba(0,0,0,0.15);">
+  <div class="sheet" id="s6" style="z-index: 1;">
+    <div class="page-face front" style="box-shadow: inset 15px 0 30px rgba(0,0,0,0.15);">
       <div class="inner-border"></div>
     </div>
-
-    <div class="page hardcover">
-      <div style="font-family: 'Cinzel', serif; font-size: 1.2rem; color: var(--gold);">FIM</div>
+    <div class="page-face back hardcover">
+      <div style="font-family: 'Cinzel', serif; font-size: 1.5rem; color: var(--gold);">FIM</div>
     </div>
-
   </div>
+
 </div>
 
-<div class="hint">Arraste a ponta das folhas ou clique nos cantos para folhear</div>
+<div class="controls">
+  <button class="btn" id="prevBtn" onclick="goPrev()">◄ Voltar</button>
+  <button class="btn" id="nextBtn" onclick="goNext()">Avançar ►</button>
+</div>
 
 <script>
-// Garante o carregamento completo do DOM antes de montar o Turn.js
-$(window).on('load', function() {
-  $('#biography-book').turn({
-    width: 900,
-    height: 600,
-    autoCenter: true,
-    duration: 1000,
-    acceleration: true
+const book = document.getElementById('biography-book');
+const sheets = [
+  document.getElementById('s1'),
+  document.getElementById('s2'),
+  document.getElementById('s3'),
+  document.getElementById('s4'),
+  document.getElementById('s5'),
+  document.getElementById('s6')
+];
+
+let currentLoc = 0;
+const maxLoc = sheets.length;
+
+function openBook() {
+  book.classList.add('open');
+}
+
+function closeBook(isAtStart) {
+  if(isAtStart) {
+    book.classList.remove('open');
+  }
+}
+
+function goNext() {
+  if(currentLoc < maxLoc) {
+    if(currentLoc === 0) openBook();
+    sheets[currentLoc].classList.add('flipped');
+    // Atualiza o z-index dinamicamente para manter a folha que virou atrás da próxima
+    sheets[currentLoc].style.zIndex = currentLoc + 1;
+    currentLoc++;
+  }
+}
+
+function goPrev() {
+  if(currentLoc > 0) {
+    currentLoc--;
+    sheets[currentLoc].classList.remove('flipped');
+    // Restaura o z-index original para que ela fique por cima ao voltar
+    sheets[currentLoc].style.zIndex = maxLoc - currentLoc;
+    if(currentLoc === 0) closeBook(true);
+  }
+}
+
+// Permite virar clicando direto nas páginas também
+sheets.forEach((sheet, idx) => {
+  sheet.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if(sheet.classList.contains('flipped')) {
+      // Se clicou em uma folha já virada (lado esquerdo), volta
+      goPrev();
+    } else {
+      // Se clicou no lado direito, avança
+      goNext();
+    }
   });
-  // Torna o livro visível apenas depois de estar perfeitamente montado em 3D
-  $('#book-wrapper').css('visibility', 'visible');
 });
 </script>
 
