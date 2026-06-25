@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartas para Minha Linda Flor</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: #1e1a17;
+            background-image: radial-gradient(#2d2520 20%, transparent 80%);
+            font-family: 'Georgia', serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+        
+        .instrucoes {
+            color: #c5a880;
+            margin-bottom: 25px;
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-align: center;
+            font-weight: 300;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* Container Principal do Livro */
+        .book-container {
+            perspective: 1500px;
+            width: 420px;
+            height: 580px;
+            position: relative;
+            transition: transform 0.5s ease;
+        }
+
+        /* Estado aberto desloca o livro para o centro visual */
+        .book-container.open {
+            transform: translateX(100px);
+        }
+
+        .book {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+
+        /* Páginas do Livro */
+        .page {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: left center;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* Lados da Página (Frente e Verso) */
+        .front, .back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            backface-visibility: hidden;
+            padding: 35px 30px;
+            box-shadow: inset 0px 0px 30px rgba(0, 0, 0, 0.08), 2px 4px 10px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .front {
+            background: #fdfaf2;
+            z-index: 2;
+        }
+
+        .back {
+            background: #fcf8ee;
+            transform: rotateY(180deg);
+            z-index: 1;
+        }
+
+        /* Capa do Livro (Estilização Premium) */
+        .cover {
+            background: linear-gradient(135deg, #421c17 0%, #260e0b 100%) !important;
+            border-radius: 4px 12px 12px 4px;
+            color: #e5c394;
+            padding: 40px 30px !important;
+            border-left: 8px solid #1a0a08;
+            box-shadow: inset -4px 0 10px rgba(0,0,0,0.4), 5px 10px 25px rgba(0,0,0,0.5) !important;
+        }
+
+        .cover .cover-content {
+            border: 2px solid #c5a880;
+            height: 100%;
+            width: 100%;
+            padding: 25px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.3);
+        }
+
+        .cover h1 {
+            font-size: 26px;
+            font-weight: 400;
+            letter-spacing: 3px;
+            margin-bottom: 15px;
+            line-height: 1.3;
+            text-transform: uppercase;
+            font-family: 'Times New Roman', serif;
+        }
+
+        .cover .subtitle {
+            font-size: 14px;
+            font-style: italic;
+            color: #bfa37a;
+            margin-bottom: 50px;
+        }
+
+        .cover .decor {
+            width: 60px;
+            height: 2px;
+            background-color: #c5a880;
+            margin: 20px 0;
+            position: relative;
+        }
+        .cover .decor::before {
+            content: '❖';
+            position: absolute;
+            top: -7px;
+            left: 22px;
+            background: #260e0b;
+            padding: 0 4px;
+            font-size: 10px;
+        }
+
+        .cover .author {
+            font-size: 12px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-top: auto;
+            color: #c5a880;
+        }
+
+        /* Contracapa Final */
+        .back-cover {
+            background: linear-gradient(135deg, #260e0b 0%, #1a0a08 100%) !important;
+            border-radius: 12px 4px 4px 12px;
+            box-shadow: inset 4px 0 10px rgba(0,0,0,0.4), -2px 4px 15px rgba(0,0,0,0.4) !important;
+        }
+
+        /* Conteúdo de Texto Interno */
+        .page h2 {
+            font-size: 18px;
+            color: #5c4033;
+            margin-bottom: 20px;
+            font-weight: 600;
+            border-bottom: 1px solid #e8dfcc;
+            padding-bottom: 8px;
+            font-family: 'Times New Roman', serif;
+        }
+
+        .page-text {
+            font-size: 15px;
+            line-height: 1.7;
+            color: #2b2b2b;
+            text-align: justify;
+            flex-grow: 1;
+        }
+
+        .page-text p {
+            margin-bottom: 15px;
+            text-indent: 20px;
+        }
+
+        .page-number {
+            font-size: 11px;
+            color: #9c8c7c;
+            text-align: center;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+
+        /* Classes de Controle de Animação Flip via JS */
+        .flipped {
+            transform: rotateY(-180deg);
+        }
+        
+        /* Camadas de Z-Index dinâmicas para empilhamento perfeito */
+        .z-up {
+            z-index: 10;
+        }
+
+        /* Responsividade Básica */
+        @media (max-width: 500px) {
+            .book-container {
+                width: 340px;
+                height: 500px;
+            }
+            .book-container.open {
+                transform: translateX(0px); /* Sem espaço lateral em telas pequenas */
+            }
+            .page h2 { font-size: 16px; }
+            .page-text { font-size: 13.5px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="instrucoes">Clique ou Toque nas páginas para folhear</div>
+
+    <div class="book-container" id="bookContainer">
+        <div class="book" id="book">
+            
+            <!-- CAPA DO LIVRO -->
+            <div class="page z-up" onclick="flipPage(this, 1)">
+                <div class="front cover">
+                    <div class="cover-content">
+                        <h1>Cartas para<br>Minha Linda Flor</h1>
+                        <div class="decor"></div>
+                        <div class="subtitle">Memórias de um Coração Desperto</div>
+                        <div class="author">O Alquimista</div>
+                    </div>
+                </div>
+                <div class="back">
+                    <h2>Sumário Emocional</h2>
+                    <div class="page-text" style="font-style: italic; display:flex; flex-direction:column; justify-content:center; gap:8px; text-indent:0;">
+                        <p>• Prólogo: O Garoto de Gelo</p>
+                        <p>• Capítulo 1: A Partida</p>
+                        <p>• Capítulo 2: O Maldito Pátio</p>
+                        <p>• Capítulo 3: As Máscaras</p>
+                        <p>• Capítulo 4: O Sistema Falhou</p>
+                        <p>• Capítulo 5: O Primeiro Olhar</p>
+                        <p>• Capítulo 6: Por Você</p>
+                        <p>• Capítulo 7: Toques de Silêncio</p>
+                        <p>• Capítulo 10: O Último Conselho</p>
+                        <p>• Epílogo: O Fim do Livro</p>
+                        <p>• Poesia I: O Alquimista do Avesso</p>
+                        <p>• Poesia II: Onde o Mundo Ganha Cor</p>
+                    </div>
+                    <div class="page-number">ii</div>
+                </div>
+            </div>
+
+            <!-- PAR DE PÁGINAS 1 e 2 -->
+            <div class="page" onclick="flipPage(this, 2)">
+                <div class="front">
+                    <h2>Prólogo: O Garoto de Gelo</h2>
+                    <div class="page-text"><p>Sabe, eu sempre me perguntei como acabei assim. Como me tornei alguém que parece não se importar com os outros, que não demonstra sentimentos, que não consegue sequer chorar.</p><p>Por muito tempo, olhei para as pessoas e não consegui enxergá-las como meus semelhantes. Mas, no fim das contas, eu sempre soube o motivo: eu sempre fui sozinho. Sempre soube, lá no fundo, que eu sentia menos do que os outros.</p></div>
+                    <div class="page-number">1</div>
+                </div>
+                <div class="back">
+                    <h2>Capítulo 1: A Partida</h2>
+                    <div class="page-text"><p>Quando deixei meu estado natal para vir morar aqui no Amazonas, lembro dos meus amigos reunidos para a despedida. Naquele momento exato, eu queria desesperadamente sentir alguma coisa.</p><p>Mas fui embora sem tristeza, sem saudade. Havia apenas uma ansiedade gelada para ver como seria a nova vida. Não senti um pingo de nostalgia daqueles que foram meus companheiros de infância.</p></div>
+                    <div class="page-number">2</div>
+                </div>
+            </div>
+    
+            <!-- PAR DE PÁGINAS 3 e 4 -->
+            <div class="page" onclick="flipPage(this, 3)">
+                <div class="front">
+                    <h2>Capítulo 2: O Maldito Pátio</h2>
+                    <div class="page-text"><p>Chegando aqui, comecei a estudar no 6º ano. Eu nunca fui bom em fazer amigos — desde pequeno, para falar a verdade. Passei o ensino fundamental inteiro em silêncio, sem conversar com ninguém.</p><p>Na hora do recreio, a escola trancava as portas e obrigava todo mundo a ir para o pátio. Todo recreio, toda semana, todos os dias... eu ficava naquele maldito canto, parado, completamente sozinho, assistindo o tempo passar. Foi a coisa mais horrível da minha vida. Eu ficava trancado apenas com a minha própria mente.</p></div>
+                    <div class="page-number">3</div>
+                </div>
+                <div class="back">
+                    <h2>Capítulo 3: As Máscaras</h2>
+                    <div class="page-text"><p>Eu não posso odiar esses pensamentos. Conversar comigo mesmo era a única coisa que fazia o tempo passar mais rápido. Acho que isso me tornou alguém mais profundo. Eu conheci a mim mesmo no isolamento.</p><p>Sempre odiei isso nas pessoas: essa falta de identidade própria, essa sequência de cópias ambulantes, todo mundo usando uma máscara para tentar se encaixar. Os nerds, os populares, os grupos... eu sempre consegui enxergar a falsidade nos olhos de cada um.</p></div>
+                    <div class="page-number">4</div>
+                </div>
+            </div>
+    
+            <!-- PAR DE PÁGINAS 5 e 6 -->
+            <div class="page" onclick="flipPage(this, 4)">
+                <div class="front">
+                    <h2>Capítulo 4: O Sistema Falhou</h2>
+                    <div class="page-text"><p>Aí veio o ensino médio. Achei que tudo continuaria igual, mas mudei para esta cidade. No meu primeiro dia de aula, olhando para as pessoas por apenas alguns segundos, eu já sabia a configuração de cada um. Todos iguais.</p><p>Mas decidi que seria diferente: se eu fingisse que me importava, conseguiria fazer amigos. E funcionou. Conheci pessoas incríveis. No fim, o primeiro ano do ensino médio acabou sendo divertido.</p></div>
+                    <div class="page-number">5</div>
+                </div>
+                <div class="back">
+                    <h2>Capítulo 5: O Primeiro Olhar</h2>
+                    <div class="page-text"><p>Então veio o segundo ano, e com ele conheci o maldito amor. Esse maravilhoso, horrível e misterioso sentimento. A primeira vez que conversamos foi na quadra; eu te passei uma cola de administração. Acho que ali foi o famoso amor à primeira vista.</p><p>Você foi alguém que eu não consegui decifrar nos primeiros segundos de conversa. Na época, eu não entendia o que estava acontecendo, nunca tinha feltro o amor. Mas o amor não é algo que a gente entende, né?</p></div>
+                    <div class="page-number">6</div>
+                </div>
+            </div>
+    
+            <!-- PAR DE PÁGINAS 7 e 8 -->
+            <div class="page" onclick="flipPage(this, 5)">
+                <div class="front">
+                    <h2>Capítulo 6: Por Você</h2>
+                    <div class="page-text"><p>A partir dali, as coisas mudaram. Você gostava de ler. Eu odiava livros, nunca tinha pegado em um na minha vida, mas porque você gostava, eu comecei a ler. E acabei gostando. Adorava ir para a biblioteca com você, ficar a sós.</p><p>Comecei a assistir doramas por sua causa, e os poemas... ler aqueles poemas era incrível. As palavras se conectando, rimando; eu não sei explicar, mas era mágico. Tenho que te agradecer por me mostrar essas coisas novas.</p></div>
+                    <div class="page-number">7</div>
+                </div>
+                <div class="back">
+                    <h2>Capítulo 7: Toques de Silêncio</h2>
+                    <div class="page-text"><p>Eu amava o tempo que passávamos conversando. Segurar a sua mão foi o melhor dia da minha vida. Mas não importava o que eu fizesse, parecia que eu nunca conseguia chegar perto de verdade. Eu só conhecia o que os meus olhos podiam ver.</p><p>Lembra daquele dia no cinema, no shopping? Eu estava com uma roupa que parecia de academia, ridículo, mas aquele dia foi incrível. Sabe, os meus pensamentos e as vozes na minha cabeça finalmente paravam quando você apoiava a cabeça no meu ombro. Eu pensava: <em>'tomara que o tempo pare'</em>.</p></div>
+                    <div class="page-number">8</div>
+                </div>
+            </div>
+    
+            <!-- PAR DE PÁGINAS 9 e 10 -->
+            <div class="page" onclick="flipPage(this, 6)">
+                <div class="front">
+                    <h2>Capítulo 8: O Invisível</h2>
+                    <div class="page-text"><p>Agora, eu vou falar a verdade. No fim das contas, nem por um único segundo eu realmente achei que você gostava de mim. Eu me forçava a acreditar nisso porque, na minha cabeça, parecia impossível que uma garota como você pudesse gostar de alguém como eu.</p><p>Mas e você? Você sabe o que eu gosto? Sabe qual é a minha cor favorita, a minha comida predileta? A verdade é que você nunca sequer quis saber da minha vida. Você não sabe quantos irmãos eu tenho, e não faz ideia de que eu já perdi um irmão. Mas quem se importa, né?</p></div>
+                    <div class="page-number">9</div>
+                </div>
+                <div class="back">
+                    <h2>Capítulo 9: O Jogo de Azar</h2>
+                    <div class="page-text"><p>Nossa jornada foi como um jogo onde eu apostava tudo em você, sem saber se ia ganhar ou perder. Isso me destruía por dentro, pois eu nunca soube se você me escolheria no fim. Mas eu não me importava; tudo o que eu fazia era por amor.</p><p>Por pensar demais, ter ciúme demais e ser impulsivo demais, acabei destruindo tudo de novo. Mandei mensagens erradas. Quando te perguntei o que nós éramos, você disse 'relacionamento sem rótulo'. Eu fiquei furioso. Eu estava querendo forçar algo que deveria apenas fluir naturalmente.</p></div>
+                    <div class="page-number">10</div>
+                </div>
+            </div>
+    
+            <!-- PAR DE PÁGINAS 11 e 12 -->
+            <div class="page" onclick="flipPage(this, 7)">
+                <div class="front">
+                    <h2>Capítulo 10: O Último Conselho</h2>
+                    <div class="page-text"><p>Se me permite um último conselho: pare de fazer tantas coisas ao mesmo tempo. Dedique-se a uma única coisa. Torne-se tão boa nisso a ponto de as pessoas te pagarem caro pelo seu trabalho. Você tem um futuro brilhante, mas precisa mostrar que se importa com as pessoas.</p><p>Não se esconda tanto no seu mundinho. Às vezes, precisamos encarar os nossos demônios em vez de tentar ignorá-los. A solidão é boa, mas é um vício difícil de largar. Não tenha medo de se conectar.</p></div>
+                    <div class="page-number">11</div>
+                </div>
+                <div class="back">
+                    <h2>Epílogo: O Fim do Livro</h2>
+                    <div class="page-text"><p>Eu cansei dessa dúvida, de viver esperando sem saber o que você realmente quer. Então, até mais. Eu não vou voltar atrás. Nunca mais.</p><p>Pela última vez: <em>Bom dia, minha princesa. Boa tarde, minha princesa. Boa noite, minha princesa.</em> Eu te amo tanto. Se cuida.</p><p>Me dê dois meses para que eu consiga controlar tudo isso aqui dentro. Não precisa responder. Chegou a hora de eu focar em mim. Até mais, minha linda flor. A mais bela que pude ver até hoje.</p></div>
+                    <div class="page-number">12</div>
+                </div>
+            </div>
+    
+            
+            <!-- PAR DE PÁGINAS DOS POEMAS -->
+            <div class="page" onclick="flipPage(this, 8)">
+                <div class="front">
+                    <h2>Poesia Especial I</h2>
+                    <div class="page-text"><p><strong>O Alquimista do Avesso</strong></p>
+<p style='font-style:italic; text-indent:0; font-size:14px; line-height:1.5;'>
+Eu nasci com os olhos abertos demais,<br>
+enxergando a costura invisível das máscaras.<br>
+Para mim, o mundo era um eco de passos iguais,<br>
+um pátio deserto onde as horas morriam nas cascas.<br>
+Eu era a pedra que não sabia sangrar,<br>
+o automático perfeito, o inverno que não quer passar.<br><br>
+Aí você cruzou a minha linha de giz.<br>
+Não como um sol, mas como uma falha no meu sistema.<br>
+Você era o caos que a minha lógica nunca quis,<br>
+a única rima que faltava no meu teorema.<br>
+Pela primeira vez, a armadura pesou,<br>
+e o garoto de gelo, sem perceber, derreu e chorou.<br><br>
+Nossa história foi um tabuleiro de vidro e fumaça:<br>
+eu jogava com a alma, você jogava com o vento.<br>
+Eu sabia o desenho exato da sua linha de graça,<br>
+enquanto eu era só um rascunho no seu pensamento.<br>
+Você foi a professora que me ensinou a sentir,<br>
+mas se esqueceu de ler a página que eu escrevi.
+</p></div>
+                    <div class="page-number">13</div>
+                </div>
+                <div class="back">
+                    <h2>Poesia Especial II</h2>
+                    <div class="page-text"><p><strong>Onde o Mundo Ganha Cor</strong></p>
+<p style='font-style:italic; text-indent:0; font-size:14px; line-height:1.5;'>
+Eu passava pelos dias sem pressa e sem notar,<br>
+Como quem caminha no escuro, acostumado a não ver.<br>
+Mas tudo mudou de tamanho quando te vi chegar,<br>
+Com esse jeito único que só você sabe ter.<br>
+O seu sorriso largo é o meu compasso,<br>
+A paz que eu procuro encontra abrigo no seu abraço.<br><br>
+Amo o contorno do seu cabelo em meia-lua,<br>
+A moldura perfeita para a sua intensidade.<br>
+Amo a sua mente inquieta, essa alma que é só sua,<br>
+Que muda como o tempo, mas transborda verdade.<br>
+Ver você falar do que gosta, com os olhos brilhando,<br>
+É ver o próprio universo se reinventando.<br><br>
+Sua mão pequena cabe exata na minha,<br>
+Como se o mundo fizesse sentido ali.<br>
+Você me mostrou uma estrada que eu não conhecia,<br>
+E os poemas mais lindos foram os que contigo aprendi.<br>
+Mesmo no meio do silêncio ou da confusão,<br>
+Você é a melodia principal do meu coração.
+</p></div>
+                    <div class="page-number">14</div>
+                </div>
+            </div>
+
+            <!-- CONTRACAPA FINAL -->
+            <div class="page" style="pointer-events: none;">
+                <div class="front back-cover"></div>
+                <div class="back"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('bookContainer');
+        let totalPages = document.querySelectorAll('.page').length;
+        
+        // Inicializa os z-index corretos de trás para frente para o empilhamento inicial
+        const pages = document.querySelectorAll('.page');
+        pages.forEach((page, index) => {
+            if(index > 0) {
+                page.style.zIndex = totalPages - index;
+            }
+        });
+
+        function flipPage(pageElement, pageIndex) {
+            if (!pageElement.classList.contains('flipped')) {
+                // Virar para a esquerda (Avançar)
+                pageElement.classList.add('flipped');
+                pageElement.style.zIndex = pageIndex;
+                
+                // Se for a primeira página (capa), move o container para dar espaço visual
+                if(pageIndex === 1) {
+                    container.classList.add('open');
+                }
+                
+                // Coloca a próxima página no topo de interação imediatamente
+                if(pageElement.nextElementSibling) {
+                    pageElement.nextElementSibling.classList.add('z-up');
+                }
+                pageElement.classList.remove('z-up');
+            } else {
+                // Virar de volta para a direita (Voltar)
+                pageElement.classList.remove('flipped');
+                pageElement.style.zIndex = totalPages - pageIndex + 1;
+                
+                // Se voltar para a capa, centraliza o livro novamente
+                if(pageIndex === 1) {
+                    container.classList.remove('open');
+                }
+                
+                pageElement.classList.add('z-up');
+                if(pageElement.nextElementSibling) {
+                    pageElement.nextElementSibling.classList.remove('z-up');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
