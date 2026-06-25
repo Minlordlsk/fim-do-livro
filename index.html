@@ -6,6 +6,10 @@
 <title>O Alquimista do Avesso — Alex</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
+
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -15,384 +19,280 @@
   --gold-lt: #e2c87a;
   --paper: #f2ebd8;
   --ink: #1a0e06;
-  --page-w: 700px;
 }
+
 body {
-  background: radial-gradient(circle at 50% 20%, #1c0a0a 0%, #060202 100%);
+  background: radial-gradient(circle at 50% 30%, #1c0a0a 0%, #060202 100%);
   min-height: 100vh;
-  font-family: 'EB Garamond', Georgia, serif;
-  color: var(--ink);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-bottom: 100px;
-}
-.reader {
-  width: 100%;
-  max-width: var(--page-w);
-  padding: 40px 15px;
-}
-.page {
-  display: none;
-  width: 100%;
-  animation: pageIn 0.4s ease forwards;
-}
-.page.active { display: block; }
-@keyframes pageIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.cover-page {
-  background: linear-gradient(145deg, #240c0e 0%, #120608 100%);
-  min-height: 80vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  font-family: 'EB Garamond', Georgia, serif;
+  overflow: hidden;
+}
+
+/* Área do Livro */
+#book-wrapper {
   position: relative;
-  border: 2px solid var(--gold);
-  box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-  text-align: center;
-  padding: 40px;
+  width: 900px;
+  height: 600px;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.8);
 }
-.cover-title {
-  font-family: 'Cinzel', serif;
-  font-size: 3rem;
-  color: var(--gold-lt);
-  letter-spacing: 0.1em;
-  line-height: 1.2;
-  margin-bottom: 15px;
+
+#biography-book {
+  width: 900px;
+  height: 600px;
 }
-.cover-subtitle {
-  font-style: italic;
-  font-size: 1.2rem;
-  color: rgba(226,200,122,0.7);
-  letter-spacing: 0.15em;
-  margin-bottom: 50px;
-}
-.cover-author {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.8rem;
-  color: var(--gold);
-}
-.inner-page {
+
+/* Estilo das Páginas */
+.page {
+  width: 450px;
+  height: 600px;
   background: var(--paper);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' opacity='0.03'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  padding: 60px 45px;
-  min-height: 650px;
-  border: 1px solid rgba(0,0,0,0.1);
-  box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  padding: 50px 40px;
   position: relative;
+  box-shadow: inset 3px 0 20px rgba(0,0,0,0.08);
 }
+
 .inner-border {
   position: absolute;
   inset: 20px;
   border: 1px solid rgba(150,110,50,0.15);
   pointer-events: none;
 }
-.chapter-title {
-  font-family: 'Cinzel', serif;
-  font-size: 1.5rem;
+
+/* Estilo das Capas (Páginas Hardcover) */
+.hardcover {
+  background: linear-gradient(145deg, #240c0e 0%, #120608 100%) !important;
+  color: var(--gold-lt) !important;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  color: var(--wine);
-  margin-bottom: 25px;
-  letter-spacing: 0.05em;
+  border: 1px solid rgba(201,168,76,0.2);
 }
-.poem-quote {
+
+.cover-title {
+  font-family: 'Cinzel', serif;
+  font-size: 2.5rem;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+  margin-bottom: 15px;
+}
+
+.cover-subtitle {
   font-style: italic;
   font-size: 1.1rem;
+  color: rgba(226,200,122,0.7);
+  letter-spacing: 0.12em;
+  margin-bottom: 60px;
+}
+
+.cover-author {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  color: var(--gold);
+}
+
+/* Textos internos */
+.chapter-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.3rem;
+  text-align: center;
+  color: var(--wine);
+  margin-bottom: 20px;
+}
+
+.poem-quote {
+  font-style: italic;
+  font-size: 1rem;
   text-align: center;
   color: #7a5c38;
-  margin-bottom: 30px;
-  line-height: 1.6;
+  margin-bottom: 25px;
+  line-height: 1.5;
 }
+
 .prose {
-  line-height: 1.8;
+  line-height: 1.7;
   text-align: justify;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
+  color: var(--ink);
 }
+
 .prose::first-letter {
   font-family: 'Playfair Display', serif;
-  font-size: 3.5rem;
+  font-size: 3rem;
   float: left;
   line-height: 0.8;
   margin-right: 8px;
   color: var(--wine);
   font-weight: bold;
 }
+
 .chapter-end {
-  margin-top: 35px;
+  position: absolute;
+  bottom: 50px;
+  left: 40px;
+  right: 40px;
   text-align: center;
   font-style: italic;
   color: #8a6a2a;
   border-top: 1px solid rgba(150,110,50,0.1);
   padding-top: 15px;
-  font-size: 1.05rem;
+  font-size: 1rem;
 }
+
 .page-num {
   position: absolute;
-  bottom: 25px;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: rgba(0,0,0,0.4);
 }
-.nav-bar {
-  position: fixed;
-  bottom: 0; width: 100%;
-  background: #0d0506;
-  padding: 15px;
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  border-top: 1px solid var(--gold);
-  z-index: 100;
-}
-.nav-btn {
-  background: none;
-  border: 1px solid var(--gold);
-  color: var(--gold);
-  padding: 10px 25px;
-  cursor: pointer;
+
+/* Dica de interação na tela */
+.hint {
+  color: rgba(255,255,255,0.4);
+  margin-top: 25px;
+  font-size: 0.9rem;
+  letter-spacing: 2px;
   font-family: 'Cinzel', serif;
-  transition: 0.3s;
 }
-.nav-btn:hover { background: var(--gold); color: black; }
-.nav-btn:disabled { opacity: 0.2; cursor: default; }
 </style>
 </head>
 <body>
 
-<div class="reader">
-
-  <div class="page active cover-page">
-    <div class="cover-title">O Alquimista<br>do Avesso</div>
-    <div class="cover-subtitle">Memórias de um Coração Desperto</div>
-    <div class="cover-author">Alex</div>
-  </div>
-
-  <div class="page inner-page">
-    <div class="inner-border"></div>
-    <div style="height:100%; display:flex; flex-direction:column; justify-content:center; text-align:center; padding:40px 0; margin-top:100px;">
-      <p style="font-style:italic; font-size:1.4rem; line-height:2; color:var(--wine);">
-        "Para a garota que me ensinou que até o gelo pode derreter.<br>
-        Mesmo que nossas histórias tenham seguido caminhos diferentes,<br>
-        você mudou para sempre a forma como eu enxergo o mundo."
-      </p>
+<div id="book-wrapper">
+  <div id="biography-book">
+    
+    <div class="page hardcover">
+      <div class="cover-title">O Alquimista<br>do Avesso</div>
+      <div class="cover-subtitle">Memórias de um Coração Desperto</div>
+      <div class="cover-author">Alex</div>
     </div>
-    <div class="page-num">2</div>
-  </div>
 
-  <div class="page inner-page">
-    <div class="inner-border"></div>
-    <h2 class="chapter-title">Prefácio</h2>
-    <div class="prose">
-      Esta obra não nasceu da vaidade literária, mas da necessidade urgente de organizar as cinzas do passado. Durante anos, caminhei pelo mundo convicto de que a ausência de sentimentos era minha maior fortaleza. Eu me orgulhava de ser o observador intocável, o cientista que analisava a falsidade e as máscaras alheias sem nunca se deixar corromper pelo calor humano. No entanto, toda a lógica matemática do meu isolamento ruiu no instante em que cruzei com uma linha de giz inesperada. Esta é a memória sincera de um coração que foi forçado a despertar, um relato sobre a transição dolorosa entre apenas existir em modo automático e, finalmente, descobrir o peso e a cor de estar vivo.
+    <div class="page" style="box-shadow: inset -10px 0 20px rgba(0,0,0,0.15);">
+      <div class="inner-border"></div>
     </div>
-    <div class="page-num">3</div>
-  </div>
 
-  <div class="page inner-page">
-    <div class="inner-border"></div>
-    <h2 class="chapter-title">Sumário</h2>
-    <div style="font-family:'Cinzel', serif; line-height:2.4; text-align:center; margin-top:30px; font-size:1.1rem;">
-      Prólogo — O Garoto de Gelo ........................................ 05<br>
-      Capítulo 1 — A Partida ................................................ 06<br>
-      Capítulo 2 — O Maldito Pátio ...................................... 07<br>
-      Capítulo 3 — As Máscaras .......................................... 08<br>
-      Capítulo 4 — O Sistema Falhou ................................... 09<br>
-      Capítulo 5 — O Primeiro Olhar .................................... 10<br>
-      Capítulo 6 — Livros e Poemas ...................................... 11<br>
-      Capítulo 7 — O Nome do Sentimento ............................ 12<br>
-      Capítulo 8 — Distâncias e Confusões ............................. 13<br>
-      Capítulo 9 — O Dia em que o Tempo Parou .................. 14<br>
-      Capítulo 10 — As Palavras que Destruíram Tudo ............. 15<br>
-      Capítulo 11 — Relacionamentos sem Rótulos ................. 16<br>
-      Capítulo 12 — O Último Adeus .................................... 17<br>
-      Epílogo — Onde o Mundo Ganhou Cor ......................... 18
+    <div class="page">
+      <div class="inner-border"></div>
+      <div style="height:100%; display:flex; flex-direction:column; justify-content:center; text-align:center; padding:20px;">
+        <p style="font-style:italic; font-size:1.25rem; line-height:2; color:var(--wine);">
+          "Para a garota que me ensinou que até o gelo pode derreter.<br><br>
+          Mesmo que nossas histórias tenham seguido caminhos diferentes,<br><br>
+          você mudou para sempre a forma como eu enxergo o mundo."
+        </p>
+      </div>
+      <div class="page-num">1</div>
     </div>
-    <div class="page-num">4</div>
-  </div>
 
-  <div class="page inner-page">
-    <div class="inner-border"></div>
-    <h2 class="chapter-title">Prólogo — O Garoto de Gelo</h2>
-    <p class="poem-quote">"Eu era a pedra que não sabia sangrar,<br>o automático perfeito, o inverno que não quer passar."</p>
-    <div class="prose">
-      Sempre me perguntei como acabei assim: sem me importar verdadeiramente com os outros, sem demonstrar o que se passava no meu íntimo, sem conseguir derramar uma única lágrima. Eu olhava para as pessoas ao meu redor e não conseguia vê-las como meus semelhantes; eram apenas engrenagens previsíveis de um mecanismo distante. Mas, no fim das contas, eu sempre compreendi a razão dessa apatia: eu nasci e cresci sozinho dentro de mim. Sempre soube que sentia muito menos que os outros, como se o mundo estivesse em alta definição e eu permanecesse congelado em um rascunho a preto e branco.
+    <div class="page">
+      <div class="inner-border"></div>
+      <h2 class="chapter-title">Prefácio</h2>
+      <div class="prose">
+        Esta obra não nasceu da vaidade literária, mas da necessidade urgente de organizar as cinzas do passado. Durante anos, caminhei pelo mundo convicto de que a ausência de sentimentos era minha maior fortaleza. Eu me orgulhava de ser o observador intocável, o cientista que analisava a falsidade e as máscaras alheias sem nunca se deixar corromper pelo calor humano. No entanto, toda a lógica matemática do meu isolamento ruiu no instante em que cruzei com uma linha de giz inesperada. Esta é a memória sincera de um coração que foi forçado a despertar, um relato sobre a transição dolorosa entre apenas existir em modo automático e, finalmente, descobrir o peso e a cor de estar vivo.
+      </div>
+      <div class="page-num">2</div>
     </div>
-    <div class="chapter-end">"O amor não me ensinou a viver. Ele me ensinou que eu estava apenas existindo."</div>
-    <div class="page-num">5</div>
-  </div>
 
-  <div class="page inner-page">
-    <div class="inner-border"></div>
-    <h2 class="chapter-title">Capítulo 1 — A Partida</h2>
-    <p class="poem-quote">"Partir é uma forma silenciosa de morrer para o que fomos."</p>
-    <div class="prose">
-      Quando chegou o momento de deixar o meu estado natal e partir em direção ao Amazonas, os meus amigos de infância reuniram-se para a despedida. Lembro-me perfeitamente de olhar para os rostos deles e procurar, no fundo da minha alma, qualquer resquício de emoção. Eu queria sentir o aperto no peito, a melancolia da saudade, a dor do adeus. Mas afastei-me seco. Viajei sem olhar para trás, sem sentir uma única gota de tristeza pelos laços que deixava. Havia apenas uma curiosidade fria e puramente cerebral sobre como seria a nova vida. Eu carregava o inverno comigo na bagagem, imune ao calor que me aguardava lá fora.
+    <div class="page">
+      <div class="inner-border"></div>
+      <h2 class="chapter-title">Prólogo — O Garoto de Gelo</h2>
+      <p class="poem-quote">"Eu era a pedra que não sabia sangrar,<br>o automático perfeito, o inverno que não quer passar."</p>
+      <div class="prose">
+        Sempre me perguntei como acabei assim: sem me importar verdadeiramente com os outros, sem demonstrar o que se passava no meu íntimo, sem conseguir derramar uma única lágrima. Eu olhava para as pessoas ao meu redor e não conseguia vê-las como meus semelhantes; eram apenas engrenagens previsíveis de um mecanismo distante. Mas, no fim das contas, eu sempre compreendi a razão dessa apatia: eu nasci e cresci sozinho dentro de mim. Sempre soube que sentia muito menos que os outros, como se o mundo estivesse em alta definição e eu permanecesse congelado em um rascunho a preto e branco.
+      </div>
+      <div class="chapter-end">"O amor não me ensinou a viver. Ele me ensinou que eu estava apenas existindo."</div>
+      <div class="page-num">3</div>
     </div>
-    <div class="chapter-end">"Há despedidas que machucam menos do que os silêncios."</div>
-    <div class="page-num">6</div>
-  </div>
 
-  <div class="page inner-page">
-    <div class="inner-border"></div>
-    <h2 class="chapter-title">Capítulo 2 — O Maldito Pátio</h2>
-    <p class="poem-quote">"No silêncio de um canto opaco,<br>a mente constrói o seu próprio labirinto."</p>
-    <div class="prose">
-      O tempo avançou e comecei a frequentar a escola no Amazonas a partir do 6º ano. Se a minha habilidade para criar conexões já era escassa desde a infância, ali as coisas atingiram o limite absoluto. Atravessei praticamente todo o ensino fundamental sem trocar uma palavra sincera com ninguém, sem um único amigo. O recreio era a materialização do meu inferno pessoal. Eles trancavam as portas das salas e obrigavam toda a gente a descer para o pátio. Eu passava aqueles minutos intermináveis parado, estático num canto isolado, simplesmente vendo o tempo escoar. Foi a coisa mais horrível da minha vida. Mas foi ali que as vozes na minha cabeça ganharam força; falar comigo mesmo passou a ser o único escudo para acelerar as horas.
+    <div class="page">
+      <div class="inner-border"></div>
+      <h2 class="chapter-title">Capítulo 1 — A Partida</h2>
+      <p class="poem-quote">"Partir é uma forma silenciosa de morrer para o que fomos."</p>
+      <div class="prose">
+        Quando chegou o momento de deixar o meu estado natal e partir em direção ao Amazonas, os meus amigos de infância reuniram-se para a despedida. Lembro-me perfeitamente de olhar para os rostos deles e procurar, no fundo da minha alma, qualquer resquício de emoção. Eu queria sentir o aperto no peito, a melancolia da saudade, a dor do adeus. Mas afastei-me seco. Viajei sem olhar para trás, sem sentir uma única gota de tristeza pelos laços que deixava. Havia apenas uma curiosidade fria e puramente cerebral sobre como seria a nova vida. Eu carregava o inverno comigo na bagagem, imune ao calor que me aguardava lá fora.
+      </div>
+      <div class="chapter-end">"Há despedidas que machucam menos do que os silêncios."</div>
+      <div class="page-num">4</div>
     </div>
-    <div class="chapter-end">"Algumas pessoas entram na nossa vida para ficar. Outras entram para nos transformar."</div>
-    <div class="page-num">7</div>
-  </div>
 
-  <div class="page inner-page">
-    <div class="inner-border"></div>
-    <h2 class="chapter-title">Capítulo 3 — As Máscaras</h2>
-    <p class="poem-quote">"Enxergando a costura invisível de cada personagem."</p>
-    <div class="prose">
-      Foi no 9º ano que encontrei o meu primeiro amigo genuíno. Ele era esquisito, terrivelmente inteligente, e talvez por isso tenha gostado dele de imediato. Ele não se parecia com os outros; recusava-se a ser apenas mais uma cópia barata. Eu sempre nutri uma aversão profunda por aquele padrão social repetitivo: a sala dividida entre os populares, os nerds, os grupos intocáveis. Para mim, todos pareciam usar a mesmíssima máscara, escondendo vazios e inseguranças idênticas. Eu sentia que possuía uma consciência exagerada, uma capacidade quase maldita de ler a falsidade gravada nos olhos das pessoas e enxergar a realidade nua, crua e desprovida de qualquer brilho.
+    <div class="page">
+      <div class="inner-border"></div>
+      <h2 class="chapter-title">Capítulo 2 — O Maldito Pátio</h2>
+      <p class="poem-quote">"No silêncio de um canto opaco,<br>a mente constrói o seu próprio labirinto."</p>
+      <div class="prose">
+        O tempo avançou e comecei a frequentar a escola no Amazonas a partir do 6º ano. Se a minha habilidade para criar conexões já era escassa desde a infância, ali as coisas atingiram o limite absoluto. Atravessei praticamente todo o ensino fundamental sem trocar uma palavra sincera com ninguém, sem um único amigo. O recreio era a materialização do meu inferno pessoal. Eles trancavam as portas das salas e obrigavam toda a gente a descer para o pátio. Eu passava aqueles minutos intermináveis parado, estático num canto isolado, simplesmente vendo o tempo escoar. Foi a coisa mais horrível da minha vida. Mas foi ali que as vozes na minha cabeça ganharam força; falar comigo mesmo passou a ser o único escudo para acelerar as horas.
+      </div>
+      <div class="chapter-end">"Algumas pessoas entram na nossa vida para ficar. Outras entram para nos transformar."</div>
+      <div class="page-num">5</div>
     </div>
-    <div class="chapter-end">"O pior isolamento é estar cercado por pessoas que fingem ser quem não são."</div>
-    <div class="page-num">8</div>
-  </div>
 
-  <div class="page inner-page">
-    <div class="inner-border"></div>
-    <h2 class="chapter-title">Capítulo 4 — O Sistema Falhou</h2>
-    <p class="poem-quote">"Não como um sol, mas como uma falha gritante no meu teorema."</p>
-    <div class="prose">
-      Quando ingressei no ensino médio, mudámo-nos para uma nova cidade — um lugar que, admito, aprendi a odiar profundamente. No primeiro dia de aula, bastaram alguns segundos de observação para que eu mapeasse toda a dinâmica da turma: quem seria o líder, quem formaria alianças e para onde cada grupo iria caminhar. Todos pareciam saídos da mesma linha de montagem com as configurações de fábrica. No entanto, decidi subverter o meu próprio sistema. Pensei: "Se eu fingir que me importo com as pessoas, talvez consiga fazer amigos". Montei a minha própria simulação de simpatia. Funcionou de forma assustadora. Fiz amigos, vivi momentos incrivelmente divertidos no 1º ano, embora tenha demorado apenas três semanas após o término das aulas para esquecer completamente o nome de todos eles.
+    <div class="page">
+      <div class="inner-border"></div>
+      <h2 class="chapter-title">Capítulo 5 — O Primeiro Olhar</h2>
+      <p class="poem-quote">"Você era o caos que a minha lógica nunca quis calcular."</p>
+      <div class="prose">
+        Então, o segundo ano do ensino médio começou, e com ele veio o embate definitivo com o desconhecido. Conheci o amor — esse sentimento simultaneamente magnífico, terrível e profundamente misterioso. A nossa primeira interação real aconteceu na quadra da escola, quando te passei uma cola de administração. Olhando para trás, creio que foi ali que experimentei o impacto avassalador do amor à primeira vista. Pela primeira vez na vida, deparei-me com uma mente que eu não conseguia decifrar ou rotular nos primeiros segundos de conversa. Eu não sabia o que estava a acontecer comigo; nunca tinha sentido aquela urgência, aquele ciúme corrosivo de te ver conversar com outros, aquela obsessão silenciosa que ocupava os meus pensamentos a cada hora do dia. O garoto de gelo começava, finalmente, a rachar.
+      </div>
+      <div class="chapter-end">"Ela nunca soube que era a personagem principal do livro que eu escrevia dentro da minha cabeça."</div>
+      <div class="page-num">6</div>
     </div>
-    <div class="chapter-end">"Fingir sentir é a forma mais refinada de continuar completamente sozinho."</div>
-    <div class="page-num">9</div>
-  </div>
 
-  <div class="page inner-page">
-    <div class="inner-border"></div>
-    <h2 class="chapter-title">Capítulo 5 — O Primeiro Olhar</h2>
-    <p class="poem-quote">"Você era o caos que a minha lógica nunca quis calcular."</p>
-    <div class="prose">
-      Então, o segundo ano do ensino médio começou, e com ele veio o embate definitivo com o desconhecido. Conheci o amor — esse sentimento simultaneamente magnífico, terrível e profundamente misterioso. A nossa primeira interação real aconteceu na quadra da escola, quando te passei uma cola de administração. Olhando para trás, creio que foi ali que experimentei o impacto avassalador do amor à primeira vista. Pela primeira vez na vida, deparei-me com uma mente que eu não conseguia decifrar ou rotular nos primeiros segundos de conversa. Eu não sabia o que estava a acontecer comigo; nunca tinha sentido aquela urgência, aquele ciúme corrosivo de te ver conversar com outros, aquela obsessão silenciosa que ocupava os meus pensamentos a cada hora do dia. O garoto de gelo começava, finalmente, a rachar.
+    <div class="page">
+      <div class="inner-border"></div>
+      <h2 class="chapter-title">Capítulo 9 — O Dia em que o Tempo Parou</h2>
+      <p class="poem-quote">"A única rima que realmente importava no meu teorema."</p>
+      <div class="prose">
+        Havia um milagre discreto que acontecia sempre que estávamos juntos: o turbilhão barulhento dos meus pensamentos calava-se por completo no instante exato em que tu pousavas a cabeça no meu ombro. A minha mente, sempre tão analítica e caótica, resumia-se a um único e suplicante desejo: que o universo congelasse aquele momento para sempre. Quando o final do ano se aproximou, juntei todas as minhas forças e decidi que me declararia na noite da formatura. Faltou-me a coragem presencial. Acabei por confessar tudo através de uma mensagem de telemóvel — um gesto que hoje reconheço como patético. Tu deste uma resposta ambígua, daquelas que só tu sabias dar, mantendo o mistério que eu nunca conseguia prever.
+      </div>
+      <div class="chapter-end">"Pela primeira vez a armadura pesou, e o garoto de gelo chorou."</div>
+      <div class="page-num">7</div>
     </div>
-    <div class="chapter-end">"Ela nunca soube que era a personagem principal do livro que eu escrevia dentro da minha cabeça."</div>
-    <div class="page-num">10</div>
-  </div>
 
-  <div class="page inner-page">
-    <div class="inner-border"></div>
-    <h2 class="chapter-title">Capítulo 6 — Livros e Poemas</h2>
-    <p class="poem-quote">"Você foi a professora que me ensinou a ler o que estava nas entrelinhas."</p>
-    <div class="prose">
-      Tu adoravas ler. Eu, por outro lado, sempre detestara livros; nunca tinha pegado numa obra literária por iniciativa própria em toda a minha existência. Mas porque tu amavas aquele universo, forcei-me a abrir a primeira página. Comecei a ler contigo. Passámos a frequentar a biblioteca da escola, saboreando aqueles momentos em que ficávamos completamente a sós no meio das estantes. Por tua causa, rendi-me aos doramas e descobri o impacto da poesia. Ver as palavras a conectarem-se através das rimas despertou algo que eu nem sequer sabia explicar. Agradeço-te imenso por me teres pego pela mão e mostrado uma perspetiva do mundo que eu ignorava por completo.
+    <div class="page">
+      <div class="inner-border"></div>
+      <h2 class="chapter-title">Epílogo — Onde o Mundo Ganhou Cor</h2>
+      <p class="poem-quote">"A solidão é um vício confortável, mas o mundo real exige coragem."</p>
+      <div class="prose" style="font-size:1.05rem;">
+        Deixo-te este último conselho de quem te quer bem: foca-te numa única meta até seres verdadeiramente excecional nela. O dinheiro dar-te-á a estrutura para realizares os teus inúmeros sonhos; não te disperses a tentar fazer tudo ao mesmo tempo para não seres apenas "mais ou menos" em tudo. E não te escondas tanto no teu próprio mundo. Enfrenta os teus demónios de frente. Peço-te apenas que respeites o meu espaço e não me envies mensagens durante os próximos dois meses; preciso deste tempo para recuperar o controlo dos meus sentimentos e não vacilar. Se o destino decidir que nos cruzaremos novamente no futuro, sabe que serei sempre alguém capaz de te compreender como ninguém. Cuida-te, minha linda flor.
+      </div>
+      <div class="chapter-end" style="border:none; font-weight:bold; color:var(--wine); bottom:35px; font-size:1.05rem; text-align:justify; line-height:1.4;">
+        "Talvez você nunca leia estas páginas. Mas, se algum dia ler, saiba que foi você quem colocou cor em um mundo que eu acreditava ser feito apenas de cinza."
+      </div>
+      <div class="page-num">8</div>
     </div>
-    <div class="chapter-end">"Os poemas mais bonitos que aprendi foram aqueles que li nos teus olhos."</div>
-    <div class="page-num">11</div>
-  </div>
 
-  <div class="page inner-page">
-    <div class="inner-border"></div>
-    <h2 class="chapter-title">Capítulo 7 — O Nome do Sentimento</h2>
-    <p class="poem-quote">"Nossa história foi um tabuleiro incerto de vidro e fumaça."</p>
-    <div class="prose">
-      Chegámos ao terceiro ano e eu continuava sem saber dar o nome correto ao que sentia, embora fizesse absolutamente tudo para tentar compreender-te e mapear os teus passos. Eu tentava aproximar-me, mas tu tinhas uma capacidade única de te afastares logo a seguir, de mudares bruscamente de humor, erguendo barreiras intransponíveis. Qualquer outra pessoa teria desistido e seguido em frente, mas como o meu repertório emocional era limitado, eu não me desgastava com as tuas rejeições; simplesmente continuava ali, firme. Eu amava cada segundo das nossas conversas. O dia em que segurei a tua mão tornou-se, sem qualquer dúvida, o melhor momento de toda a minha vida. No entanto, por mais que eu me esforçasse, sentia que só conseguia tocar a superfície daquilo que tu permitias que o mundo visse.
+    <div class="page" style="box-shadow: inset 10px 0 20px rgba(0,0,0,0.15);">
+      <div class="inner-border"></div>
     </div>
-    <div class="chapter-end">"Eu jogava com a alma, enquanto tu parecias jogar apenas com o vento."</div>
-    <div class="page-num">12</div>
-  </div>
 
-  <div class="page inner-page">
-    <div class="inner-border"></div>
-    <h2 class="chapter-title">Capítulo 8 — Distâncias e Confusões</h2>
-    <p class="poem-quote">"Erros cometidos por quem ainda não sabia soletrar o afeto."</p>
-    <div class="prose">
-      Frustrado com a distância imposta, afastei-me de forma desajeitada. Num equívoco tremendo, convenci-me de que a tua irmã nutria sentimentos por mim e direcionei a minha atenção para ela, confundindo amizade com amor — mais um tropeço típico de quem estava a aprender a lidar com o coração. Acabei por me declarar, levei um fora compreensível, mas felizmente mantivemos uma ligação incrível. A Angelina é uma pessoa fantástica e torço honestamente pelo sucesso do namoro dela. Mas, regressando a nós: tentei aproximar-me de ti novamente. Lembras-te daquele dia no cinema, quando fomos os três ao shopping e eu apareci com aquela roupa que parecia que ia para a academia? Eu morria de vergonha, mas se não fosses tu, eu nunca teria saído de casa. Eu tinha tanto para te agradecer.
+    <div class="page hardcover">
+      <div style="font-family: 'Cinzel', serif; font-size: 1.2rem; color: var(--gold);">FIM</div>
     </div>
-    <div class="chapter-end">"Há desvios que só servem para nos mostrar o tamanho do caminho certo."</div>
-    <div class="page-num">13</div>
-  </div>
 
-  <div class="page inner-page">
-    <div class="inner-border"></div>
-    <h2 class="chapter-title">Capítulo 9 — O Dia em que o Tempo Parou</h2>
-    <p class="poem-quote">"A única rima que realmente importava no meu teorema."</p>
-    <div class="prose">
-      Havia um milagre discreto que acontecia sempre que estávamos juntos: o turbilhão barulhento dos meus pensamentos calava-se por completo no instante exato em que tu pousavas a cabeça no meu ombro. A minha mente, sempre tão analítica e caótica, resumia-se a um único e suplicante desejo: que o universo congelasse aquele momento para sempre. Quando o final do ano se aproximou, juntei todas as minhas forças e decidi que me declararia na noite da formatura. Faltou-me a coragem presencial. Acabei por confessar tudo através de uma mensagem de telemóvel — um gesto que hoje reconheço como patético. Tu deste uma resposta ambígua, daquelas que só tu sabias dar, mantendo o mistério que eu nunca conseguia prever.
-    </div>
-    <div class="chapter-end">"Pela primeira vez a armadura pesou, e o garoto de gelo chorou."</div>
-    <div class="page-num">14</div>
   </div>
-
-  <div class="page inner-page">
-    <div class="inner-border"></div>
-    <h2 class="chapter-title">Capítulo 10 — As Palavras que Destruíram Tudo</h2>
-    <p class="poem-quote">"O silêncio que se instala após a queda das últimas ilusões."</p>
-    <div class="prose">
-      O choque de realidade veio logo na manhã seguinte. Tu simplesmente ignoraste a minha existência. Deixaste de me responder durante uma semana inteira — ou talvez tenha sido um mês de um silêncio sufocante. Quando fomos juntos ao cinema com o grupo, agiste como se eu fosse invisível, sem me dares uma única explicação ou palavra de conforto. Foi naquele momento que percebi, com uma nitidez dolorosa, como conseguias ser fria quando querias focar apenas no teu próprio bem-estar. Passados alguns dias, quando te confrontei sobre o sucedido, recebi uma resposta curta, desprovida de qualquer calor: "Mudei de ideia, só isso". Sem pedidos de desculpa. Fingi que não me importava, mas a verdade é que eu só precisava de um arrependimento sincero da tua parte.
-    </div>
-    <div class="chapter-end">"O orgulho reconstrói a muralha que o afeto demorou meses a derrubar."</div>
-    <div class="page-num">15</div>
-  </div>
-
-  <div class="page inner-page">
-    <div class="inner-border"></div>
-    <h2 class="chapter-title">Capítulo 11 — Relacionamentos sem Rótulos</h2>
-    <p class="poem-quote">"Tentar prender o vento com as mãos é a maior das minhas loucuras."</p>
-    <div class="prose">
-      Apesar de tudo, reatámos o contacto. Confessaste mais tarde que me tinhas ignorado de propósito porque estavas confusa, e eu, ignorando qualquer réstia de amor-próprio, voltei a correr atrás de ti. Perdi a conta às vezes em que jurei a mim mesmo que me afastaria, bastando que publicasses um vídeo qualquer no teu estado para eu esquecer o meu orgulho e regressar. No meio de tanta insistência, acabei por te conhecer a um nível muito mais profundo, apaixonando-me por aquilo que os olhos comuns não conseguiam captar. Mas a minha falta de maturidade e os meus ciúmes impulsivos atacaram novamente. Quando exigi saber o que realmente éramos, deste-me o veredicto: "Um relacionamento sem rótulos". Aquilo revoltou-me. Fiquei furioso por sentir que todo o meu esforço resultava numa indefinição. Eu estava a tentar forçar uma estrutura num sentimento que precisava apenas de fluir livremente.
-    </div>
-    <div class="chapter-end">"Há rótulos que aprisionam, mas a ausência deles às vezes destrói."</div>
-    <div class="page-num">16</div>
-  </div>
-
-  <div class="page inner-page">
-    <div class="inner-border"></div>
-    <h2 class="chapter-title">Capítulo 12 — O Último Adeus</h2>
-    <p class="poem-quote">"Antes que o rascunho do amor se transforme na tinta do ódio."</p>
-    <div class="prose">
-      Eu amo cada traço teu: o teu sorriso largo, o contorno do teu cabelo em meia-lua, a tua mente inquieta e até a tua bipolaridade imprevisível. Amo ver-te falar com os olhos brilhantes sobre as coisas que te apaixonam. Senti inveja da facilidade com que declaravas o teu carinho por outras pessoas publicamente, perguntando-me se algum dia farias o mesmo por mim ou o que é que os teus antigos namorados tinham que eu não possuía. Mas cansei-me de viver na corda bamba da incerteza. Sinto que o nosso carinho corre o risco de se transformar em ressentimento devido aos meus erros constantes. Por isso, decidi travar o relógio antes que destruamos o que restou de bom. Pela última vez: Bom dia, boa tarde e boa noite, minha princesa. Eu amo-te tanto que aceito o teu silêncio.
-    </div>
-    <div class="chapter-end">"Deixar ir é a prova de alquimia mais dolorosa e real que realizei."</div>
-    <div class="page-num">17</div>
-  </div>
-
-  <div class="page inner-page">
-    <div class="inner-border"></div>
-    <h2 class="chapter-title">Epílogo — Onde o Mundo Ganhou Cor</h2>
-    <p class="poem-quote">"A solidão é um vício confortável, mas o mundo real exige coragem."</p>
-    <div class="prose">
-      Deixo-te este último conselho de quem te quer bem: foca-te numa única meta até seres verdadeiramente excecional nela. O dinheiro dar-te-á a estrutura para realizares os teus inúmeros sonhos; não te disperses a tentar fazer tudo ao mesmo tempo para não seres apenas "mais ou menos" em tudo. E não te escondas tanto no teu próprio mundo. Enfrenta os teus demónios de frente. Peço-te apenas que respeites o meu espaço e não me envies mensagens durante os próximos dois meses; preciso deste tempo para recuperar o controlo dos meus sentimentos e não vacilar. Se o destino decidir que nos cruzaremos novamente no futuro, sabe que serei sempre alguém capaz de te compreender como ninguém. Cuida-te, minha linda flor.
-    </div>
-    <div class="chapter-end" style="border:none; font-weight:bold; color:var(--wine); margin-top:50px; font-size:1.15rem; text-align:justify;">
-      "Talvez você nunca leia estas páginas. Mas, se algum dia ler, saiba que foi você quem colocou cor em um mundo que eu acreditava ser feito apenas de cinza."
-    </div>
-    <div class="page-num">18</div>
-  </div>
-
 </div>
 
-<nav class="nav-bar">
-  <button class="nav-btn" id="prevBtn" disabled onclick="nav(-1)">◄ Anterior</button>
-  <button class="nav-btn" id="nextBtn" onclick="nav(1)">Próxima ►</button>
-</nav>
+<div class="hint">Arraste a ponta das folhas ou clique nos cantos para folhear</div>
 
 <script>
-let currentPage = 0;
-const pages = document.querySelectorAll('.page');
-const prevBtn = document.getElementById('prevBtn');
-const nextBtn = document.getElementById('nextBtn');
-
-function nav(dir) {
-  pages[currentPage].classList.remove('active');
-  currentPage += dir;
-  pages[currentPage].classList.add('active');
-  
-  prevBtn.disabled = (currentPage === 0);
-  nextBtn.disabled = (currentPage === pages.length - 1);
-  
-  window.scrollTo(0, 0);
-}
+// Ativa o efeito 3D real de folhear livro
+$(document).ready(function() {
+  $('#biography-book').turn({
+    width: 900,
+    height: 600,
+    autoCenter: true,
+    duration: 1200, // Velocidade da transição da folha
+    acceleration: true
+  });
+});
 </script>
 
 </body>
