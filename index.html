@@ -32,12 +32,13 @@ body {
   overflow: hidden;
 }
 
-/* Área do Livro */
+/* Container do Livro */
 #book-wrapper {
   position: relative;
   width: 900px;
   height: 600px;
   box-shadow: 0 30px 70px rgba(0,0,0,0.8);
+  visibility: hidden; /* Oculta até o turn.js carregar e alinhar tudo */
 }
 
 #biography-book {
@@ -45,12 +46,12 @@ body {
   height: 600px;
 }
 
-/* Estilo das Páginas */
+/* Estilo Base das Páginas */
 .page {
   width: 450px;
   height: 600px;
-  background: var(--paper);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background: var(--paper) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E") !important;
   padding: 50px 40px;
   position: relative;
   box-shadow: inset 3px 0 20px rgba(0,0,0,0.08);
@@ -63,7 +64,7 @@ body {
   pointer-events: none;
 }
 
-/* Estilo das Capas (Páginas Hardcover) */
+/* Capas Rígidas */
 .hardcover {
   background: linear-gradient(145deg, #240c0e 0%, #120608 100%) !important;
   color: var(--gold-lt) !important;
@@ -98,7 +99,7 @@ body {
   color: var(--gold);
 }
 
-/* Textos internos */
+/* Textos e Capítulos */
 .chapter-title {
   font-family: 'Cinzel', serif;
   font-size: 1.3rem;
@@ -155,7 +156,6 @@ body {
   color: rgba(0,0,0,0.4);
 }
 
-/* Dica de interação na tela */
 .hint {
   color: rgba(255,255,255,0.4);
   margin-top: 25px;
@@ -250,7 +250,7 @@ body {
       <h2 class="chapter-title">Capítulo 9 — O Dia em que o Tempo Parou</h2>
       <p class="poem-quote">"A única rima que realmente importava no meu teorema."</p>
       <div class="prose">
-        Havia um milagre discreto que acontecia sempre que estávamos juntos: o turbilhão barulhento dos meus pensamentos calava-se por completo no instante exato em que tu pousavas a cabeça no meu ombro. A minha mente, sempre tão analítica e caótica, resumia-se a um único e suplicante desejo: que o universo congelasse aquele momento para sempre. Quando o final do ano se aproximou, juntei todas as minhas forças e decidi que me declararia na noite da formatura. Faltou-me a coragem presencial. Acabei por confessar tudo através de uma mensagem de telemóvel — um gesto que hoje reconheço como patético. Tu deste uma resposta ambígua, daquelas que só tu sabias dar, mantendo o mistério que eu nunca conseguia prever.
+        Havia um milagre discreto que acontecia sempre que estávamos juntos: o turbilhão barulhento dos meus pensamentos calava-se por completo no instante exato em que tu pousavas a cabeça no meu ombro. A minha mente, sempre tão analítica e caótica, resumia-se a um único e suplicante desejo: que o universo congelasse aquele momento para sempre. Quando o final do ano se aproximou, juntei todas as minhas forças e decidi que me declararia na noite da formatura. Faltou-me a coragem presencial. Acabei por confessar tudo através de uma mensagem de telemóvel — um gesto que hoje reconheço como patético. Tu deste uma resposta ambígua, daquelas que só tu sabias dar, mantendo o misterério que eu nunca conseguia prever.
       </div>
       <div class="chapter-end">"Pela primeira vez a armadura pesou, e o garoto de gelo chorou."</div>
       <div class="page-num">7</div>
@@ -283,15 +283,17 @@ body {
 <div class="hint">Arraste a ponta das folhas ou clique nos cantos para folhear</div>
 
 <script>
-// Ativa o efeito 3D real de folhear livro
-$(document).ready(function() {
+// Garante o carregamento completo do DOM antes de montar o Turn.js
+$(window).on('load', function() {
   $('#biography-book').turn({
     width: 900,
     height: 600,
     autoCenter: true,
-    duration: 1200, // Velocidade da transição da folha
+    duration: 1000,
     acceleration: true
   });
+  // Torna o livro visível apenas depois de estar perfeitamente montado em 3D
+  $('#book-wrapper').css('visibility', 'visible');
 });
 </script>
 
